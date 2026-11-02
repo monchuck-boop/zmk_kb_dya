@@ -1,7 +1,7 @@
-name: Build ZMK firmware　alone
+name: Build ZMK firmware
 
 on:
-  workflow_dispatch: # WEB画面からの手動実行ボタンを有効化
+  workflow_dispatch:
   push:
     paths:
       - 'config/**'
@@ -16,22 +16,33 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # エラー原因：westコマンドを事前にシステムへインストールするステップを追加
+      - name: Install West
+        run: pip install west
+
       - name: Cache dependencies
         uses: actions/cache@v4
         with:
           path: |
             ~/.buildcache
             dependencies
-          key: ${{ runner.os }}-zmk-${{ hashFiles('Makefile', 'west.yml') }}
+          key: ${{ runner.os }}-zmk-${{ hashFiles('Makefile', 'west-standalone.yml') }}
 
       - name: Initialize standalone environment
         run: make init-standalone
 
-      - name: Build firmware
-        run: make build-all
+      - name: Build Right Hand Only (Central)
+        run: |
+          cd dependencies/zmk/app
+          west build -b nice_nano_v2 -- -DSHIELD=keyball61_right -DZMK_CONFIG="${{ github.workspace }}/config"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: keyball61-zmk-firmware
-          path: build/**/zephyr/zmk.uf2
+          name: keyball61-right-firmware
+          path: dependencies/zmk/app/build/zephyr/zmk.uf2
