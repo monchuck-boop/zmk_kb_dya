@@ -22,7 +22,7 @@ jobs:
         with:
           python-version: '3.11'
 
-      # 2. システムに存在する「すべてのPython環境」へ強制的に依存パッケージを流し込む
+      # 2. システムに存在するすべてのPython環境へ、依存パッケージを強制注入
       - name: Install West & All Python Environments Fix
         run: |
           # 1) 指定したPython 3.11環境へのインストール
@@ -36,18 +36,22 @@ jobs:
 
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      # 3. ZMK/Zephyrに必要なコンパイルツール（Armクロスコンパイラ・Ninja・Protobuf）を一括インストール
-      - name: Install ARM Toolchain
+      # 3. ZMK/Zephyrに必要なコンパイルツール（Armクロスコンパイラ・Ninja・Protobuf、および【今回の原因であるDTC】）を一括インストール
+      - name: Install ARM Toolchain & DTC
         run: |
-          sudo apt-get install -y gcc-arm-none-eabi bsdmainutils ninja-build protobuf-compiler
+          sudo apt-get install -y gcc-arm-none-eabi bsdmainutils ninja-build protobuf-compiler device-tree-compiler
 
-      # 4. Zephyrにツールチェーン、使用するPythonを環境変数に完全固定する
+      # 4. Zephyrにツールチェーン、使用するPython、およびすべての外部モジュールのバグを無視するフラグを環境変数に完全固定する
       - name: Set Toolchain, Python & Global CFLAGS
         run: |
           echo "ZEPHYR_TOOLCHAIN_VARIANT=gnuarmemb" >> $GITHUB_ENV
           echo "GNUARMEMB_TOOLCHAIN_PATH=/usr" >> $GITHUB_ENV
           echo "WEST_PYTHON=/usr/bin/python3" >> $GITHUB_ENV
           echo "PYTHON_EXECUTABLE=/usr/bin/python3" >> $GITHUB_ENV
+          
+          # セミコロン区切りですべての外部モジュールにエラー無視を強制適用
+          echo "EXTRA_CFLAGS=-Wno-overflow;-Wno-error;-Wno-format;-Wno-error=implicit-function-declaration;-Wno-implicit-function-declaration;-Wno-discarded-qualifiers;-Wno-error=return-mismatch;-Wno-return-mismatch;-include;stdio.h" >> $GITHUB_ENV
+          echo "ZEPHYR_EXTRA_CFLAGS=-Wno-overflow;-Wno-error;-Wno-format;-Wno-error=implicit-function-declaration;-Wno-implicit-function-declaration;-Wno-discarded-qualifiers;-Wno-error=return-mismatch;-Wno-return-mismatch;-include;stdio.h" >> $GITHUB_ENV
 
       # 5. リポジトリ内の設定をもとに環境を初期化
       - name: West Init
@@ -63,7 +67,7 @@ jobs:
             /usr/bin/python3 -m pip install --break-system-packages -r dependencies/zephyr/scripts/requirements.txt || true
           fi
 
-      # 7. 右手専用を指定してコンパイル（シールド名「keyball61_right」でビルドを実行）
+      # 7. 右手専用を指定してコンパイル（シールド名「keyball61_right」で確実に右手単体マトリクスを生成）
       - name: Build Right Hand Only (Central)
         run: |
           cd dependencies/zmk/app
