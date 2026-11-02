@@ -49,11 +49,21 @@ jobs:
 
       - name: Patch Zephyr and Modules for GCC 14 Compatibility
         run: |
+          # 1) settings-rpc モジュールの snprintf 不足の修正 (stdio.h を追加)
           FILE_RPC="dependencies/zmk-module-settings-rpc/src/studio/settings_rpc_handler.c"
           if [ -f "$FILE_RPC" ]; then
             sed -i '1s/^/#include <stdio.h>\n/' "$FILE_RPC"
             echo "Patched $FILE_RPC"
           fi
+
+          # 2) runtime-input-processor モジュールの const 型不整合を直接書き換え修正
+          FILE_INPUT="dependencies/zmk-module-runtime-input-processor/src/pointing/input_processor_runtime.c"
+          if [ -f "$FILE_INPUT" ]; then
+            sed -i 's/static struct device \*runtime_processors/static const struct device \*runtime_processors/g' "$FILE_INPUT"
+            echo "Successfully patched const qualifier in $FILE_INPUT"
+          fi
+
+          # 3) 全ビルド、全モジュールから警告によるビルド停止の影響を抑え込む予備措置
           ZMK_CMAKE="dependencies/zmk/app/CMakeLists.txt"
           if [ -f "$ZMK_CMAKE" ]; then
             sed -i '2i add_compile_options("-Wno-error")' "$ZMK_CMAKE"
