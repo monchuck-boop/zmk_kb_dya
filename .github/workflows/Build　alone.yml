@@ -22,12 +22,22 @@ jobs:
         with:
           python-version: '3.11'
 
-      # 2. システムに存在する「すべてのPython環境」へ強制的にpyelftoolsとwestを流し込む
+      # 2. システムに存在する「すべてのPython環境」へ強制的に依存パッケージを流し込む
       - name: Install West & All Python Environments Fix
         run: |
           # 1) 指定したPython 3.11環境へのインストール
           python3 -m pip install --upgrade pip
-          python3 -m pip install west pyelftools
+          python3 -m pip install west pyelftools protobuf grpcio-tools
+          
+          # 2) Linuxのシステム標準Python環境へのインストール (これが最重要)
+          sudo apt-get update
+
+          
+          sudo apt-get install -y python3-pip python3-setuptools
+          /usr/bin/python3 -m pip install --break-system-packages west pyelftools protobuf grpcio-tools || true
+
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
           
       # 3. ZMK/Zephyrに必要なコンパイルツール（Armクロスコンパイラ・Ninja・Protobuf）をインストール
       - name: Install ARM Toolchain
