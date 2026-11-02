@@ -73,7 +73,6 @@ jobs:
           if [ -f dependencies/zephyr/scripts/requirements.txt ]; then
             /usr/bin/python3 -m pip install --break-system-packages -r dependencies/zephyr/scripts/requirements.txt || true
           fi
-
       # 7. 右手専用を指定してコンパイル (環境変数を引き継いで実行)
       - name: Build Right Hand Only (Central)
         run: |
