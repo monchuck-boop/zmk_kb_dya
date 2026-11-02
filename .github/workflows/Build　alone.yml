@@ -1,0 +1,37 @@
+name: Build ZMK firmware
+
+on:
+  workflow_dispatch: # WEB画面からの手動実行ボタンを有効化
+  push:
+    paths:
+      - 'config/**'
+      - '.github/workflows/build.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.buildcache
+            dependencies
+          key: ${{ runner.os }}-zmk-${{ hashFiles('Makefile', 'west.yml') }}
+
+      - name: Initialize standalone environment
+        run: make init-standalone
+
+      - name: Build firmware
+        run: make build-all
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: keyball61-zmk-firmware
+          path: build/**/zephyr/zmk.uf2
