@@ -31,7 +31,8 @@ jobs:
           
           # 2) Linuxのシステム標準Python環境へのインストール (これが最重要)
           sudo apt-get update
-          sudo apt-get install -y python3-pip python3-setuptools python3-elftools
+          # 👇 ここから python3-elftools を削除しました
+          sudo apt-get install -y python3-pip python3-setuptools
           /usr/bin/python3 -m pip install --break-system-packages west pyelftools || true
 
           echo "$HOME/.local/bin" >> $GITHUB_PATH
