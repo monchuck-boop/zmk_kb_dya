@@ -63,21 +63,30 @@ jobs:
             /usr/bin/python3 -m pip install --break-system-packages -r dependencies/zephyr/scripts/requirements.txt || true
           fi
 
-      # 🔥【新設】Zephyr 4.1 / GCC 14 のヘッダー厳格化バグを強制自動修正する
-      - name: Patch Settings RPC Module (Fix Missing stdio.h)
+      # 🔥【超強力パッチ】Zephyr 4.1 / GCC 14 環境でエラーになる外部モジュールのコードを直接修正
+      - name: Patch External Modules for Zephyr 4.1 Compatibility
         run: |
-          TARGET_FILE="dependencies/zmk-module-settings-rpc/src/studio/settings_rpc_handler.c"
-          if [ -f "$TARGET_FILE" ]; then
-            # ファイルの先頭に #include <stdio.h> を挿入する
-            sed -i '1s/^/#include <stdio.h>\n/' "$TARGET_FILE"
-            echo "Successfully patched $TARGET_FILE"
+          # 1) settings-rpc モジュールの snprintf 不足の修正 (stdio.h を追加)
+          FILE_RPC="dependencies/zmk-module-settings-rpc/src/studio/settings_rpc_handler.c"
+          if [ -f "$FILE_RPC" ]; then
+            sed -i '1s/^/#include <stdio.h>\n/' "$FILE_RPC"
+            echo "Patched: $FILE_RPC"
+          fi
+
+          # 2) runtime-input-processor モジュールの const 型不整合の修正
+          #    "static struct device *" を "static const struct device *" に書き換えます
+          FILE_INPUT="dependencies/zmk-module-runtime-input-processor/src/pointing/input_processor_runtime.c"
+          if [ -f "$FILE_INPUT" ]; then
+            sed -i 's/static struct device \*runtime_processors/static const struct device \*runtime_processors/g' "$FILE_INPUT"
+            echo "Patched: $FILE_INPUT"
           fi
 
       # 7. 右手専用を指定してコンパイル
       - name: Build Right Hand Only (Central)
         run: |
           cd dependencies/zmk/app
-          west build -b nice_nano -- -DSHIELD=keyball61_right -DZMK_CONFIG="${{ github.workspace }}/config" -DCONFIG_COMPILER_WARNINGS_AS_ERRORS=n
+          # 💡 内部の型自体を書き換えたため、特殊なオプションなしの標準コマンドに戻します
+          west build -b nice_nano -- -DSHIELD=keyball61_right -DZMK_CONFIG="${{ github.workspace }}/config"
 
 
       # 8. 完成した右手単体用の zmk.uf2 を成果物として保存
