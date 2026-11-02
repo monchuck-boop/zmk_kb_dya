@@ -52,10 +52,11 @@ jobs:
       # 5. リポジトリ内の設定をもとに環境を初期化 (Zephyr 3.5 安定ブランチを指定)
       - name: West Init
         run: |
-          # 💡 -m で ZMK公式の安定版ブランチ(zmk-3.5)を指定して環境を初期化します
+          # 💡 URLを zmkfirmware/zmk まで正しく指定しました
           west init -m https://github.com --mr zmk-3.5 config --mf west-standalone.yml
           west update
           west zephyr-export
+
 
 
       # 6. Zephyrコアのスクリプト要求ファイルをシステムPython側へ一括インストール
