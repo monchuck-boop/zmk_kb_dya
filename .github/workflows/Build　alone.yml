@@ -1,49 +1,66 @@
-name: Build ZMK firmware al
+Run cd dependencies/zmk/app
+-- west build: generating a build system
+Loading Zephyr default modules (Zephyr base).
+-- Application: /home/runner/work/zmk_kb_dya/zmk_kb_dya/dependencies/zmk/app
+-- CMake version: 4.4.4
+-- Found Python3: /opt/hostedtoolcache/Python/3.11.17/x64/bin/python (found suitable version "3.11.17", minimum required is "3.10") found components: Interpreter
+-- Cache files will be written to: /home/runner/.cache/zephyr
+-- Zephyr version: 4.1.0 (/home/runner/work/zmk_kb_dya/zmk_kb_dya/dependencies/zephyr)
+-- Found west (found suitable version "1.5.0", minimum required is "0.14.0")
+CMake Warning (deprecated) at keymap-module/modules/modules.cmake:53 (message):
+-- Adding ZMK config directory as board root: /home/runner/work/zmk_kb_dya/zmk_kb_dya/config
+  The `config/boards` folder is deprecated.  Please use a module instead.
+  See https://zmk.dev/docs/hardware-integration/new-shield and
+  https://zmk.dev/docs/development/module-creation for more information.
+Call Stack (most recent call first):
+  /home/runner/work/zmk_kb_dya/zmk_kb_dya/dependencies/zephyr/cmake/modules/zephyr_module.cmake:126 (include)
+  /home/runner/work/zmk_kb_dya/zmk_kb_dya/dependencies/zephyr/cmake/modules/zephyr_default.cmake:134 (include)
+  /home/runner/work/zmk_kb_dya/zmk_kb_dya/dependencies/zephyr/share/zephyr-package/cmake/ZephyrConfig.cmake:66 (include)
+  /home/runner/work/zmk_kb_dya/zmk_kb_dya/dependencies/zephyr/share/zephyr-package/cmake/ZephyrConfig.cmake:92 (include_boilerplate)
+  CMakeLists.txt:9 (find_package)
+This warning is for project developers.  Use -Wno-author or -Wno-deprecated
+to suppress it.
 
-on:
-  workflow_dispatch:
-  push:
-    paths:
-      - 'config/**'
-      - '.github/workflows/build.yml'
+-- Board: nice_nano, Revision: 2.0.0, qualifiers: nrf52840
+-- Shield(s): keyball61_right
+Checking /home/runner/work/zmk_kb_dya/zmk_kb_dya/dependencies/zmk-driver-pmw3610-with-custom-studio-rpc
+Checking /home/runner/work/zmk_kb_dya/zmk_kb_dya/dependencies/zmk-module-runtime-input-processor
+Checking /home/runner/work/zmk_kb_dya/zmk_kb_dya/dependencies/zmk-module-ble-management
+Checking /home/runner/work/zmk_kb_dya/zmk_kb_dya/dependencies/zmk-module-settings-rpc
+Checking /home/runner/work/zmk_kb_dya/zmk_kb_dya/dependencies/zmk-module-battery-history
+Checking /home/runner/work/zmk_kb_dya/zmk_kb_dya/dependencies/zmk-feature-custom-settings
+Checking /home/runner/work/zmk_kb_dya/zmk_kb_dya/dependencies/zmk-feature-module-physical-layout
+Checking /home/runner/work/zmk_kb_dya/zmk_kb_dya/dependencies/zmk-feature-device-info
+Checking /home/runner/work/zmk_kb_dya/zmk_kb_dya/dependencies/zmk-feature-watchdog
+Checking /home/runner/work/zmk_kb_dya/zmk_kb_dya/dependencies/zmk/app/module
+Checking /home/runner/work/zmk_kb_dya/zmk_kb_dya/dependencies/zmk-feature-os-detection
+Checking /home/runner/work/zmk_kb_dya/zmk_kb_dya/dependencies/zmk-feature-runtime-macro
+Checking /home/runner/work/zmk_kb_dya/zmk_kb_dya/dependencies/zmk-feature-runtime-combo
+Checking /home/runner/work/zmk_kb_dya/zmk_kb_dya/dependencies/zmk-feature-default-layer
+Checking /home/runner/work/zmk_kb_dya/zmk_kb_dya/dependencies/zmk/app
+found /home/runner/work/zmk_kb_dya/zmk_kb_dya/dependencies/zmk/app
+nice_nano_nrf52840 for _nrf52840 for nice_nano with version 2.0.0
+Checking /home/runner/work/zmk_kb_dya/zmk_kb_dya/config
+Checking /home/runner/work/zmk_kb_dya/zmk_kb_dya/dependencies/zephyr
+-- ZMK Config directory: /home/runner/work/zmk_kb_dya/zmk_kb_dya/config
+-- ZMK Config Kconfig: /home/runner/work/zmk_kb_dya/zmk_kb_dya/config/keyball61.conf
+-- ZMK Config Kconfig: /home/runner/work/zmk_kb_dya/zmk_kb_dya/config/keyball61.conf
+-- Using keymap file: /home/runner/work/zmk_kb_dya/zmk_kb_dya/config/keyball61.keymap
+CMake Error at /home/runner/work/zmk_kb_dya/zmk_kb_dya/dependencies/zephyr/cmake/modules/FindZephyr-sdk.cmake:57 (if):
+  if given arguments:
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
+    "(" "zephyr" "STREQUAL" ")" "OR" "(" "NOT" "DEFINED" "ZEPHYR_TOOLCHAIN_VARIANT" ")" "OR" "(" "DEFINED" "ZEPHYR_SDK_INSTALL_DIR" ")" "OR" "(" "Zephyr-sdk_FIND_REQUIRED" ")"
 
-      # 1. Python環境を立ち上げる
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
+  Unknown arguments specified
+Call Stack (most recent call first):
+  /home/runner/work/zmk_kb_dya/zmk_kb_dya/dependencies/zephyr/cmake/modules/FindHostTools.cmake:53 (find_package)
+  /home/runner/work/zmk_kb_dya/zmk_kb_dya/dependencies/zephyr/cmake/modules/dts.cmake:9 (find_package)
+  /home/runner/work/zmk_kb_dya/zmk_kb_dya/dependencies/zephyr/cmake/modules/zephyr_default.cmake:134 (include)
+  /home/runner/work/zmk_kb_dya/zmk_kb_dya/dependencies/zephyr/share/zephyr-package/cmake/ZephyrConfig.cmake:66 (include)
+  /home/runner/work/zmk_kb_dya/zmk_kb_dya/dependencies/zephyr/share/zephyr-package/cmake/ZephyrConfig.cmake:92 (include_boilerplate)
+  CMakeLists.txt:9 (find_package)
 
-      # 2. westツールをインストールし、実行パスに追加
-      - name: Install West & Add to PATH
-        run: |
-          pip install west
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      # 3. リポジトリ内の設定をもとに環境を初期化
-      - name: West Init
-        run: |
-          west init -l config --mf west-standalone.yml
-          west update
-          west zephyr-export
-
-      # 4. ボード名を「nice_nano」に修正し、右手専用を指定してコンパイル
-      - name: Build Right Hand Only (Central)
-        run: |
-          cd dependencies/zmk/app
-          west build -b nice_nano -- -DSHIELD=keyball61_right -DZMK_CONFIG="${{ github.workspace }}/config"
-
-      # 5. 完成した右手単体用の zmk.uf2 を成果物として保存
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: keyball61-right-firmware
-          path: dependencies/zmk/app/build/zephyr/zmk.uf2
+-- Configuring incomplete, errors occurred!
+FATAL ERROR: command exited with status 1: /usr/local/bin/cmake -DWEST_PYTHON=/opt/hostedtoolcache/Python/3.11.17/x64/bin/python -B/home/runner/work/zmk_kb_dya/zmk_kb_dya/dependencies/zmk/app/build -GNinja -DBOARD=nice_nano -DSHIELD=keyball61_right -DZMK_CONFIG=/home/runner/work/zmk_kb_dya/zmk_kb_dya/config -S/home/runner/work/zmk_kb_dya/zmk_kb_dya/dependencies/zmk/app
+Error: Process completed with exit code 1.
