@@ -67,11 +67,11 @@ jobs:
             /usr/bin/python3 -m pip install --break-system-packages -r dependencies/zephyr/scripts/requirements.txt || true
           fi
 
-      # 7. 右手専用を指定してコンパイル（右手シールドのフラグを直接注入してマトリクスを完全固定）
+      # 7. 右手専用を指定してコンパイル（エラーフラグを削除し、純粋なシールド指定に戻します）
       - name: Build Right Hand Only (Central)
         run: |
           cd dependencies/zmk/app
-          west build -b nice_nano -- -DSHIELD=keyball61_right -DCONFIG_SHIELD_KEYBALL61_RIGHT=y -DZMK_CONFIG="${{ github.workspace }}/config" -DCONFIG_ZMK_BATTERY_HISTORY=n -DCONFIG_ZMK_BATTERY_HISTORY_STUDIO_RPC=n
+          west build -b nice_nano -- -DSHIELD=keyball61_right -DZMK_CONFIG="${{ github.workspace }}/config" -DCONFIG_ZMK_BATTERY_HISTORY=n -DCONFIG_ZMK_BATTERY_HISTORY_STUDIO_RPC=n
 
       # 8. 完成した右手単体用の zmk.uf2 を成果物として保存
       - name: Upload Artifacts
