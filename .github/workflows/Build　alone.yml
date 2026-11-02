@@ -78,7 +78,7 @@ jobs:
       - name: Build Right Hand Only (Central)
         run: |
           cd dependencies/zmk/app
-          west build -b nice_nano -- -DSHIELD=keyball61_right -DZMK_CONFIG="${{ github.workspace }}/config" -DEXTRA_CFLAGS="-Wno-overflow -Wno-error -Wno-format -include stdio.h"
+          west build -b nice_nano -- -DSHIELD=keyball61_right -DZMK_CONFIG="${{ github.workspace }}/config" -DEXTRA_CFLAGS="-Wno-overflow -Wno-error -Wno-format -include stdio.h -include zmk/split/bluetooth/central.h"
 
       # 8. 完成した右手単体用の zmk.uf2 を成果物として保存
       - name: Upload Artifacts
