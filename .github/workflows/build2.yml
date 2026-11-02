@@ -62,14 +62,15 @@ jobs:
           if [ -f dependencies/zephyr/scripts/requirements.txt ]; then
             /usr/bin/python3 -m pip install --break-system-packages -r dependencies/zephyr/scripts/requirements.txt || true
           fi
-          
-      # 7. 右手専用を指定してコンパイル (Kconfig経由で警告による停止を完全に無効化)
-      - name: Build Right Hand Only (Central)
-        run: |
-          cd dependencies/zmk/app
-          # 💡 EXTRA_CFLAGS を廃止し、-DCONFIG_COMPILER_WARNINGS_AS_ERRORS=n を指定します
-          west build -b nice_nano -- -DSHIELD=keyball61_right -DZMK_CONFIG="${{ github.workspace }}/config" -DCONFIG_COMPILER_WARNINGS_AS_ERRORS=n
 
+      # 🔥【新設】Zephyr 4.1 / GCC 14 のヘッダー厳格化バグを強制自動修正する
+      - name: Patch Settings RPC Module (Fix Missing stdio.h)
+        run: |
+          TARGET_FILE="dependencies/zmk-module-settings-rpc/src/studio/settings_rpc_handler.c"
+          if [ -f "$TARGET_FILE" ]; then
+            # ファイルの先頭に #include <stdio.h> を挿入する
+            sed -i '1s/^/#include <stdio.h>\n/' "$TARGET_FILE"
+            echo "Successfully patched $TARGET_FILE"
 
       # 8. 完成した右手単体用の zmk.uf2 を成果物として保存
       - name: Upload Artifacts
