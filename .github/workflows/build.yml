@@ -1,4 +1,4 @@
-name: Build ZMK firmware
+name: Build ZMK firmware　al
 
 on:
   workflow_dispatch:
@@ -16,24 +16,53 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Cache dependencies
-        uses: actions/cache@v4
+      # 1. Python環境を設定
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          path: |
-            ~/.buildcache
-            dependencies
-          key: ${{ runner.os }}-zmk-${{ hashFiles('Makefile', 'west.yml') }}
+          python-version: '3.11'
 
-      - name: Initialize standalone environment
-        run: make init-standalone
+      # 2. westツールおよびコンパイルに必要なPythonライブラリを「すべて」インストール
+      - name: Install West and Python Dependencies
+        run: |
+          pip install --upgrade pip
+          pip install west pyelftools
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
+      # 3. ZMK/Zephyrに必要なコンパイルツール（Armクロスコンパイラ）を直接インストール
+      - name: Install ARM Toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-arm-none-eabi bsdmainutils ninja-build
+
+      # 4. Zephyrにツールチェーンの場所を環境変数で指示
+      - name: Set Toolchain Environment Variables
+        run: |
+          echo "ZEPHYR_TOOLCHAIN_VARIANT=gnuarmemb" >> $GITHUB_ENV
+          echo "GNUARMEMB_TOOLCHAIN_PATH=/usr" >> $GITHUB_ENV
+
+      # 5. リポジトリ内の設定をもとに環境を初期化
+      - name: West Init
+        run: |
+          west init -l config --mf west-standalone.yml
+          west update
+          west zephyr-export
+
+      # 6. Zephyrコアが持つ追加のPython要求ファイルを「念のため」すべて解決
+      - name: Install Zephyr Additional Python Requirements
+        run: |
+          if [ -f dependencies/zephyr/scripts/requirements.txt ]; then
+            pip install -r dependencies/zephyr/scripts/requirements.txt
+          fi
+
+      # 7. 右手専用を指定してコンパイル
       - name: Build Right Hand Only (Central)
-        # Makefileを使わず、ZMKの標準コマンドで直接「右手シールド」を指定してビルドします
         run: |
           cd dependencies/zmk/app
-          west build -b nice_nano_v2 -- -DSHIELD=keyball61_right -DZMK_CONFIG="${{ github.workspace }}/config"
+          west build -b nice_nano -- -DSHIELD=keyball61_right -DZMK_CONFIG="${{ github.workspace }}/config"
 
-      - name: Upload artifacts
+      # 8. 完成した右手単体用の zmk.uf2 を成果物として保存
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: keyball61-right-firmware
