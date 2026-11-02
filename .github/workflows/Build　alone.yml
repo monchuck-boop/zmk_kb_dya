@@ -64,7 +64,7 @@ jobs:
             /usr/bin/python3 -m pip install --break-system-packages -r dependencies/zephyr/scripts/requirements.txt || true
           fi
 
-      # 7. 右手専用を指定してコンパイル (外部モジュールも含めて、すべての警告・未定義エラーを確実に無視して完走させる)
+      # 7. 右手専用を指定してコンパイル (セミコロン区切りで戻り値バグも含めて全エラーを警告に格下げする)
       - name: Build Right Hand Only (Central)
         run: |
           cd dependencies/zmk/app
