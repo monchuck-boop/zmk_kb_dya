@@ -56,11 +56,12 @@ jobs:
             echo "Patched $FILE_RPC"
           fi
 
-          # 2) runtime-input-processor モジュールの const 型不整合を直接書き換え修正
+          # 2) 🔥【正規表現強化】runtime-input-processor モジュールの const 型不整合を確実に置換
+          # スペースや改行の数に左右されず、"static struct device *runtime_processors" を強制的に const 化します
           FILE_INPUT="dependencies/zmk-module-runtime-input-processor/src/pointing/input_processor_runtime.c"
           if [ -f "$FILE_INPUT" ]; then
-            sed -i 's/static struct device \*runtime_processors/static const struct device \*runtime_processors/g' "$FILE_INPUT"
-            echo "Successfully patched const qualifier in $FILE_INPUT"
+            perl -i -pe 's/static\s+struct\s+device\s*\*\s*runtime_processors/static const struct device *runtime_processors/g' "$FILE_INPUT"
+            echo "Successfully patched const qualifier via regex in $FILE_INPUT"
           fi
 
           # 3) 全ビルド、全モジュールから警告によるビルド停止の影響を抑え込む予備措置
