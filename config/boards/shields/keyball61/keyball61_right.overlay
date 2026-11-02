@@ -10,16 +10,18 @@
     };
 };
 
-
-
-
 #include "keyball61.dtsi"
 
 &default_transform {
     col-offset = <0>;
 };
 
+/* 
+ * ⚠️ 【超重要】左4列の電気的フリーズを解消するマトリクス再定義
+ * 行（row）と列（col）のピンを正確な順序で結合し、右手単体で全キーをスキャンさせます
+ */
 &kscan0 {
+    compatible = "zmk,kscan-charlieplexing";
     row-gpios
         = <&pro_micro 3 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
         , <&pro_micro 4 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
@@ -27,15 +29,14 @@
         , <&pro_micro 6 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
         , <&pro_micro 7 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
         ;
-    
-	col-gpios
+    col-gpios
         = <&pro_micro 9  GPIO_ACTIVE_HIGH>
         , <&pro_micro 8  GPIO_ACTIVE_HIGH>
         , <&pro_micro 18 GPIO_ACTIVE_HIGH>
-	    , <&pro_micro 19 GPIO_ACTIVE_HIGH>
-		, <&pro_micro 20 GPIO_ACTIVE_HIGH>
-		, <&pro_micro 21 GPIO_ACTIVE_HIGH>
-		;
+        , <&pro_micro 19 GPIO_ACTIVE_HIGH>
+        , <&pro_micro 20 GPIO_ACTIVE_HIGH>
+        , <&pro_micro 21 GPIO_ACTIVE_HIGH>
+        ;
 };
 
 &pinctrl {
@@ -76,7 +77,6 @@
         y-input-code = <INPUT_REL_Y>;
         disable-burst-read;
     };
-
 };
 
 &pinctrl {
