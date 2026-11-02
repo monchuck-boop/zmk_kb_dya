@@ -63,11 +63,12 @@ jobs:
             /usr/bin/python3 -m pip install --break-system-packages -r dependencies/zephyr/scripts/requirements.txt || true
           fi
 
-        # 7. 右手専用を指定してコンパイル（最重要：オーバーフロー警告によるビルド停止を回避するフラグを追加）
+      # 7. 右手専用を指定してコンパイル (すべての警告によるエラー昇格を完全に無効化)
       - name: Build Right Hand Only (Central)
         run: |
           cd dependencies/zmk/app
-          west build -b nice_nano -- -DSHIELD=keyball61_right -DZMK_CONFIG="${{ github.workspace }}/config" -DEXTRA_CFLAGS="-Wno-overflow -Wno-error"
+          # 💡 EXTRA_CFLAGS を "-Wno-error" に変更して、すべての警告を許容させます
+          west build -b nice_nano -- -DSHIELD=keyball61_right -DZMK_CONFIG="${{ github.workspace }}/config" -DEXTRA_CFLAGS="-Wno-error"
 
 
       # 8. 完成した右手単体用の zmk.uf2 を成果物として保存
