@@ -36,12 +36,12 @@ jobs:
 
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      # 3. ZMK/Zephyrに必要なコンパイルツール（Armクロスコンパイラ・Ninja・Protobuf、およびDTC）を一括インストール
+      # 3. ZMK/Zephyrに必要なコンパイルツール（Armクロスコンパイラ・Ninja・Protobuf・DTC）を一括インストール
       - name: Install ARM Toolchain & DTC
         run: |
           sudo apt-get install -y gcc-arm-none-eabi bsdmainutils ninja-build protobuf-compiler device-tree-compiler
 
-      # 4. Zephyrにツールチェーン、使用するPython、および【Cライブラリと競合しない安全なエラー無視フラグ】を環境変数に完全固定する
+      # 4. Zephyrにツールチェーン、使用するPython、およびすべての外部モジュールのバグを無視するフラグを環境変数に完全固定する
       - name: Set Toolchain, Python & Global CFLAGS
         run: |
           echo "ZEPHYR_TOOLCHAIN_VARIANT=gnuarmemb" >> $GITHUB_ENV
@@ -49,7 +49,8 @@ jobs:
           echo "WEST_PYTHON=/usr/bin/python3" >> $GITHUB_ENV
           echo "PYTHON_EXECUTABLE=/usr/bin/python3" >> $GITHUB_ENV
           
-          # 👇【超重要】picolibcの破壊原因となっていた -include stdio.h を完全に排除しました
+          # セミコロン区切りですべての外部モジュールにエラー無視を強制適用、さらにKconfigの厳格すぎる警告停止を完全にバイパス
+          echo "KCONFIG_WARN_AS_ERROR=0" >> $GITHUB_ENV
           echo "EXTRA_CFLAGS=-Wno-overflow;-Wno-error;-Wno-format;-Wno-error=implicit-function-declaration;-Wno-implicit-function-declaration;-Wno-discarded-qualifiers;-Wno-error=return-mismatch;-Wno-return-mismatch" >> $GITHUB_ENV
           echo "ZEPHYR_EXTRA_CFLAGS=-Wno-overflow;-Wno-error;-Wno-format;-Wno-error=implicit-function-declaration;-Wno-implicit-function-declaration;-Wno-discarded-qualifiers;-Wno-error=return-mismatch;-Wno-return-mismatch" >> $GITHUB_ENV
 
@@ -67,11 +68,10 @@ jobs:
             /usr/bin/python3 -m pip install --break-system-packages -r dependencies/zephyr/scripts/requirements.txt || true
           fi
 
-      # 7. 右手専用を指定してコンパイル（Kconfigの警告エラーを環境変数で強力に強制突破します）
+      # 7. 右手専用を指定してコンパイル（シールド名「keyball61_right」でビルドを実行）
       - name: Build Right Hand Only (Central)
         run: |
           cd dependencies/zmk/app
-          export KCONFIG_WARN_AS_ERROR=0
           west build -b nice_nano -- -DSHIELD=keyball61_right -DZMK_CONFIG="${{ github.workspace }}/config" -DCONFIG_ZMK_BATTERY_HISTORY=n -DCONFIG_ZMK_BATTERY_HISTORY_STUDIO_RPC=n
 
       # 8. 完成した右手単体用の zmk.uf2 を成果物として保存
