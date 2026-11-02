@@ -29,17 +29,17 @@ jobs:
           python3 -m pip install --upgrade pip
           python3 -m pip install west pyelftools
           
-          # 2) Linuxのシステム標準Python環境へのインストール (これが最重要)
-          sudo apt-get update
-          # 👇 ここから python3-elftools を削除しました
-          sudo apt-get install -y python3-pip python3-setuptools
-          /usr/bin/python3 -m pip install --break-system-packages west pyelftools || true
-
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-      # 3. ZMK/Zephyrに必要なコンパイルツール（Armクロスコンパイラ・Ninja）をインストール
+      # 3. ZMK/Zephyrに必要なコンパイルツール（Armクロスコンパイラ・Ninja・Protobuf）をインストール
       - name: Install ARM Toolchain
         run: |
+          # 👇 末尾に protobuf-compiler を追加しました
+          sudo apt-get install -y gcc-arm-none-eabi bsdmainutils ninja-build protobuf-compiler
+
+
+   # 3. ZMK/Zephyrに必要なコンパイルツール（Armクロスコンパイラ・Ninja・Protobuf）をインストール
+      - name: Install ARM Toolchain
+        run: |
+          #
           sudo apt-get install -y gcc-arm-none-eabi bsdmainutils ninja-build
 
       # 4. Zephyrにツールチェーンと【使用するPython】を環境変数で超強力に強制固定する
