@@ -71,6 +71,14 @@ jobs:
             # ファイルの先頭に #include <stdio.h> を挿入する
             sed -i '1s/^/#include <stdio.h>\n/' "$TARGET_FILE"
             echo "Successfully patched $TARGET_FILE"
+          fi
+
+      # 7. 右手専用を指定してコンパイル
+      - name: Build Right Hand Only (Central)
+        run: |
+          cd dependencies/zmk/app
+          west build -b nice_nano -- -DSHIELD=keyball61_right -DZMK_CONFIG="${{ github.workspace }}/config" -DCONFIG_COMPILER_WARNINGS_AS_ERRORS=n
+
 
       # 8. 完成した右手単体用の zmk.uf2 を成果物として保存
       - name: Upload Artifacts
