@@ -1,4 +1,4 @@
-name: Build ZMK firmware　al
+name: Build ZMK firmware
 
 on:
   workflow_dispatch:
@@ -22,14 +22,14 @@ jobs:
         with:
           python-version: '3.11'
 
-      # 2. westツールおよびコンパイルに必要なPythonライブラリを「すべて」インストール
-      - name: Install West and Python Dependencies
+      # 2. westツールをインストール
+      - name: Install West
         run: |
           pip install --upgrade pip
-          pip install west pyelftools
+          pip install west
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      # 3. ZMK/Zephyrに必要なコンパイルツール（Armクロスコンパイラ）を直接インストール
+      # 3. ZMK/Zephyrに必要なコンパイルツール（Armクロスコンパイラ）をインストール
       - name: Install ARM Toolchain
         run: |
           sudo apt-get update
@@ -48,11 +48,13 @@ jobs:
           west update
           west zephyr-export
 
-      # 6. Zephyrコアが持つ追加のPython要求ファイルを「念のため」すべて解決
-      - name: Install Zephyr Additional Python Requirements
+      # 6. 【最重要：エラー解決】west build直前のPython環境に対して、直接pyelftoolsと要求ファイルを強制インストール
+      - name: Target Python Environment Fix
         run: |
+          /opt/hostedtoolcache/Python/3.11.17/x64/bin/python -m pip install --upgrade pip
+          /opt/hostedtoolcache/Python/3.11.17/x64/bin/python -m pip install pyelftools
           if [ -f dependencies/zephyr/scripts/requirements.txt ]; then
-            pip install -r dependencies/zephyr/scripts/requirements.txt
+            /opt/hostedtoolcache/Python/3.11.17/x64/bin/python -m pip install -r dependencies/zephyr/scripts/requirements.txt
           fi
 
       # 7. 右手専用を指定してコンパイル
