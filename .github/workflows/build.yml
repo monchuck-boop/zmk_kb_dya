@@ -36,10 +36,12 @@ jobs:
 
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      # 3. ZMK/Zephyrに必要なコンパイルツール（Armクロスコンパイラ・Ninja）をインストール
+            # 3. ZMK/Zephyrに必要なコンパイルツール（Armクロスコンパイラ・Ninja・Protobuf・DTC）をインストール
       - name: Install ARM Toolchain
         run: |
-          sudo apt-get install -y gcc-arm-none-eabi bsdmainutils ninja-build
+          # 👇 末尾に device-tree-compiler を追加しました
+          sudo apt-get install -y gcc-arm-none-eabi bsdmainutils ninja-build protobuf-compiler device-tree-compiler
+
 
       # 4. Zephyrにツールチェーンと【使用するPython】を環境変数で超強力に強制固定する
       - name: Set Toolchain and Python Environment Variables
