@@ -1,4 +1,4 @@
-name: Build ZMK firmware
+name: Build ZMK firmware　alone
 
 on:
   workflow_dispatch: # WEB画面からの手動実行ボタンを有効化
