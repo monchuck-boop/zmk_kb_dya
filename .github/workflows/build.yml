@@ -1,78 +1,40 @@
 name: Build ZMK firmware
 
 on:
-  push:
-    branches:
-      - main
-      - dya
-  pull_request:
   workflow_dispatch:
-    inputs:
-      release:
-        description: "Create a release artifact with given version"
-        required: true
+  push:
+    paths:
+      - 'config/**'
+      - '.github/workflows/build.yml'
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    container:
-      image: zmkfirmware/zmk-build-arm:stable
-    name: Build
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Cache west modules
-        uses: actions/cache@v4
-        continue-on-error: true
-        env:
-          cache_name: cache-west-modules
         with:
-          path: dependencies/
-          key: ${{ runner.os }}-build-${{ env.cache_name }}-${{ hashFiles('config/west*.yml') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache_name }}-
-      - name: Init
-        run: |
-          git config --global --add safe.directory ${{ github.workspace }}
-          make init-standalone
-      - name: Build
-        run: make build-all
-      - name: Copy artifacts
-        shell: sh -x {0}
-        run: |
-          mkdir -p artifacts
-          find ./build -type f -path '*/zephyr/zmk.uf2' \
-          | while read -r f; do
-              echo "Found: $f"
-              name=$(basename "$(dirname "$(dirname "$f")")")
-              mv "$f" "artifacts/${name}.uf2"
-            done
+          submodules: recursive
 
-      - name: Archive artifacts
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.buildcache
+            dependencies
+          key: ${{ runner.os }}-zmk-${{ hashFiles('Makefile', 'west.yml') }}
+
+      - name: Initialize standalone environment
+        run: make init-standalone
+
+      - name: Build Right Hand Only (Central)
+        # Makefileを使わず、ZMKの標準コマンドで直接「右手シールド」を指定してビルドします
+        run: |
+          cd dependencies/zmk/app
+          west build -b nice_nano_v2 -- -DSHIELD=keyball61_right -DZMK_CONFIG="${{ github.workspace }}/config"
+
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: keyball61
-          path: artifacts
-  release:
-    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.release != '' }}
-    needs: build
-    runs-on: ubuntu-latest
-    name: Release
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: keyball61
-          path: artifacts
-      - name: Create release
-        run: |
-          gh release create ${{ github.event.inputs.release }} \
-            --title "Keyball61 firmware ${{ github.event.inputs.release }}" \
-            --generate-notes \
-            --latest \
-            --target ${{ github.sha }} \
-            artifacts/*.uf2
-        env:
-          GH_TOKEN: ${{ github.token }}
+          name: keyball61-right-firmware
+          path: dependencies/zmk/app/build/zephyr/zmk.uf2
