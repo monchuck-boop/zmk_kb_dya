@@ -1,4 +1,4 @@
-name: Build ZMK firmware al
+ name: Build ZMK firmware al
 
 on:
   workflow_dispatch:
@@ -22,24 +22,24 @@ jobs:
         with:
           python-version: '3.11'
 
-      # 2. westツールをインストールし、LinuxのPATH（実行環境）に強制的に追加する
+      # 2. westツールをインストールし、実行パスに追加
       - name: Install West & Add to PATH
         run: |
           pip install west
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      # 3. リポジトリ内の設定をもとに環境を初期化（これでwest initエラーも回避できます）
+      # 3. リポジトリ内の設定をもとに環境を初期化
       - name: West Init
         run: |
           west init -l config --mf west-standalone.yml
           west update
           west zephyr-export
 
-      # 4. 右手専用（keyball61_right）を指定してコンパイル
+      # 4. ボード名を「nice_nano」に修正し、右手専用を指定してコンパイル
       - name: Build Right Hand Only (Central)
         run: |
           cd dependencies/zmk/app
-          west build -b nice_nano_v2 -- -DSHIELD=keyball61_right -DZMK_CONFIG="${{ github.workspace }}/config"
+          west build -b nice_nano -- -DSHIELD=keyball61_right -DZMK_CONFIG="${{ github.workspace }}/config"
 
       # 5. 完成した右手単体用の zmk.uf2 を成果物として保存
       - name: Upload Artifacts
