@@ -27,12 +27,17 @@ jobs:
         run: |
           # 1) 指定したPython 3.11環境へのインストール
           python3 -m pip install --upgrade pip
-          python3 -m pip install west pyelftools
+          # 👇 末尾に protobuf を追加しました
+          python3 -m pip install west pyelftools protobuf
           
           # 2) Linuxのシステム標準Python環境へのインストール (これが最重要)
           sudo apt-get update
-          sudo apt-get install -y python3-pip python3-setuptools python3-elftools
-          /usr/bin/python3 -m pip install --break-system-packages west pyelftools || true
+          sudo apt-get install -y python3-pip python3-setuptools
+          # 👇 末尾に protobuf を追加しました
+          /usr/bin/python3 -m pip install --break-system-packages west pyelftools protobuf || true
+
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
 
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
