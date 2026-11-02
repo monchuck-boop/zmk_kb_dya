@@ -1,7 +1,7 @@
-name: Build ZMK firmware alone
+name: Build ZMK firmware al
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: # WEB画面からの手動実行ボタンを有効化
   push:
     paths:
       - 'config/**'
@@ -16,33 +16,38 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      # エラー原因：westコマンドを事前にシステムへインストールするステップを追加
-      - name: Install West
-        run: pip install west
-
-      - name: Cache dependencies
+      # ZMK公式のビルド環境（westツール一式）をロードしてパスを通す
+      - name: Cache West Modules
         uses: actions/cache@v4
         with:
           path: |
-            ~/.buildcache
-            dependencies
-          key: ${{ runner.os }}-zmk-${{ hashFiles('Makefile', 'west-standalone.yml') }}
+            modules
+            tools
+            zephyr
+            bootloader
+          key: ${{ runner.os }}-zmk-modules-${{ hashFiles('config/west.yml', 'west-standalone.yml') }}
 
-      - name: Initialize standalone environment
-        run: make init-standalone
+      - name: Initialize ZMK Environment
+        uses: zmkfirmware/zmk-actions-env@v2
 
+      # インポート元のwest-standalone.ymlを使って依存関係を正しく初期化
+      - name: West Init
+        run: west init -l config --mf west-standalone.yml
+
+      - name: West Update
+        run: west update
+
+      - name: West Zephyr Export
+        run: west zephyr-export
+
+      # 競合を避け、確実に「右手シールド(keyball61_right)」を指定してビルド
       - name: Build Right Hand Only (Central)
         run: |
-          cd dependencies/zmk/app
-          west build -b nice_nano_v2 -- -DSHIELD=keyball61_right -DZMK_CONFIG="${{ github.workspace }}/config"
+          west build -s dependencies/zmk/app -b nice_nano_v2 -- -DSHIELD=keyball61_right -DZMK_CONFIG="${{ github.workspace }}/config"
 
-      - name: Upload artifacts
+      # 生成された右手専用の zmk.uf2 をアップロード
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: keyball61-right-firmware
-          path: dependencies/zmk/app/build/zephyr/zmk.uf2
+          path: build/zephyr/zmk.uf2
