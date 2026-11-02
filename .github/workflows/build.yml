@@ -1,4 +1,4 @@
-name: Build ZMK firmware a
+name: Build ZMK firmware
 
 on:
   workflow_dispatch:
@@ -22,24 +22,33 @@ jobs:
         with:
           python-version: '3.11'
 
-      # 2. westツールをインストール
-      - name: Install West
+      # 2. システムに存在する「すべてのPython環境」へ強制的にpyelftoolsとwestを流し込む
+      - name: Install West & All Python Environments Fix
         run: |
-          pip install --upgrade pip
-          pip install west
+          # 1) 指定したPython 3.11環境へのインストール
+          python3 -m pip install --upgrade pip
+          python3 -m pip install west pyelftools
+          
+          # 2) Linuxのシステム標準Python環境へのインストール (これが最重要)
+          sudo apt-get update
+          sudo apt-get install -y python3-pip python3-setuptools python3-elftools
+          /usr/bin/python3 -m pip install --break-system-packages west pyelftools || true
+
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      # 3. ZMK/Zephyrに必要なコンパイルツール（Armクロスコンパイラ）をインストール
+      # 3. ZMK/Zephyrに必要なコンパイルツール（Armクロスコンパイラ・Ninja）をインストール
       - name: Install ARM Toolchain
         run: |
-          sudo apt-get update
           sudo apt-get install -y gcc-arm-none-eabi bsdmainutils ninja-build
 
-      # 4. Zephyrにツールチェーンの場所を環境変数で指示
-      - name: Set Toolchain Environment Variables
+      # 4. Zephyrにツールチェーンと【使用するPython】を環境変数で超強力に強制固定する
+      - name: Set Toolchain and Python Environment Variables
         run: |
           echo "ZEPHYR_TOOLCHAIN_VARIANT=gnuarmemb" >> $GITHUB_ENV
           echo "GNUARMEMB_TOOLCHAIN_PATH=/usr" >> $GITHUB_ENV
+          # システムPythonを最優先に固定
+          echo "WEST_PYTHON=/usr/bin/python3" >> $GITHUB_ENV
+          echo "PYTHON_EXECUTABLE=/usr/bin/python3" >> $GITHUB_ENV
 
       # 5. リポジトリ内の設定をもとに環境を初期化
       - name: West Init
@@ -48,16 +57,14 @@ jobs:
           west update
           west zephyr-export
 
-      # 6. 【最重要：エラー解決】west build直前のPython環境に対して、直接pyelftoolsと要求ファイルを強制インストール
-      - name: Target Python Environment Fix
+      # 6. Zephyrコアのスクリプト要求ファイルをシステムPython側へ一括インストール
+      - name: Install Zephyr Additional Python Requirements
         run: |
-          /opt/hostedtoolcache/Python/3.11.17/x64/bin/python -m pip install --upgrade pip
-          /opt/hostedtoolcache/Python/3.11.17/x64/bin/python -m pip install pyelftools
           if [ -f dependencies/zephyr/scripts/requirements.txt ]; then
-            /opt/hostedtoolcache/Python/3.11.17/x64/bin/python -m pip install -r dependencies/zephyr/scripts/requirements.txt
+            /usr/bin/python3 -m pip install --break-system-packages -r dependencies/zephyr/scripts/requirements.txt || true
           fi
 
-      # 7. 右手専用を指定してコンパイル
+      # 7. 右手専用を指定してコンパイル (環境変数を引き継いで実行)
       - name: Build Right Hand Only (Central)
         run: |
           cd dependencies/zmk/app
