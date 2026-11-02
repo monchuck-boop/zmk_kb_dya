@@ -3,7 +3,16 @@
  *
  * SPDX-License-Identifier: MIT
  */
- 
+
+/ {
+    chosen {
+        zmk,kscan = &kscan0;
+    };
+};
+
+
+
+
 #include "keyball61.dtsi"
 
 &default_transform {
