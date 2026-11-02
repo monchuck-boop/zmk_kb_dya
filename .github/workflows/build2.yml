@@ -62,13 +62,13 @@ jobs:
           if [ -f dependencies/zephyr/scripts/requirements.txt ]; then
             /usr/bin/python3 -m pip install --break-system-packages -r dependencies/zephyr/scripts/requirements.txt || true
           fi
-
-      # 7. 右手専用を指定してコンパイル (すべての警告によるエラー昇格を完全に無効化)
+          
+      # 7. 右手専用を指定してコンパイル (Kconfig経由で警告による停止を完全に無効化)
       - name: Build Right Hand Only (Central)
         run: |
           cd dependencies/zmk/app
-          # 💡 EXTRA_CFLAGS を "-Wno-error" に変更して、すべての警告を許容させます
-          west build -b nice_nano -- -DSHIELD=keyball61_right -DZMK_CONFIG="${{ github.workspace }}/config" -DEXTRA_CFLAGS="-Wno-error"
+          # 💡 EXTRA_CFLAGS を廃止し、-DCONFIG_COMPILER_WARNINGS_AS_ERRORS=n を指定します
+          west build -b nice_nano -- -DSHIELD=keyball61_right -DZMK_CONFIG="${{ github.workspace }}/config" -DCONFIG_COMPILER_WARNINGS_AS_ERRORS=n
 
 
       # 8. 完成した右手単体用の zmk.uf2 を成果物として保存
