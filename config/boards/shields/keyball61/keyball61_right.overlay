@@ -4,19 +4,14 @@
  * SPDX-License-Identifier: MIT
  */
 
-// 1. 最初に必ずインクルードファイルを読み込ませてラベルを確定させます
 #include "keyball61.dtsi"
 
 / {
     chosen {
         zephyr,display = &oled;
         zmk,kscan = &kscan0;
-        zmk,matrix-transform = &right_transform; // 右手単体動作のためのマッピングを適用
+        zmk,matrix-transform = &right_transform; // 右手単体動作用のマッピングを適用
     };
-};
-
-&default_transform {
-    col-offset = <0>;
 };
 
 /* 
