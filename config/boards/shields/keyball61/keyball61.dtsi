@@ -9,7 +9,7 @@
     chosen {
         zephyr,display = &oled;
         zmk,physical-layout = &keyball_physical_layout;
-        zmk,kscan = &mock_kscan; // 👈 1. ZMKのビルドチェック用に仮想スキャンを割り当て
+        // 変更箇所：zmk,kscan の行を完全に削除（あるいは元通り未指定に）して親側の自動割当に任せます
     };
     
     keyball_physical_layout: keyball_physical_layout {
@@ -98,16 +98,8 @@
         >;
     };
 	
+    // 変更箇所：kscan0 のドライバー自体を mock に変更し、行列の競合を根本解決します
     kscan0: kscan {
-        compatible = "zmk,kscan-gpio-matrix";
-        label = "KSCAN";
-        wakeup-source;
-
-        diode-direction = "col2row";
-    };
-
-    // 👇 2. 行列プロパティチェックを通過させるための仮想デバイスをここに追加
-    mock_kscan: mock_kscan {
         compatible = "zmk,kscan-mock";
         columns = <13>;
         rows = <5>;
