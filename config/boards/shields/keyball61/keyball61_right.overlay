@@ -6,12 +6,18 @@
 
 / {
     chosen {
-        zmk,kscan = &kscan0;
+    kscan0: kscan {
         compatible = "zmk,kscan-gpio-matrix";
         label = "KSCAN";
         wakeup-source;
 
         diode-direction = "col2row";
+        
+        // 👇 最新ZMKのコンパイルエラーを回避するためにこの2行を追加します
+        rows = <5>;
+        columns = <13>;
+    };
+
     };
 };
 
