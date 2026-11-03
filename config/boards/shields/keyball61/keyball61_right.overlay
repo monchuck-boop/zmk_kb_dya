@@ -5,10 +5,14 @@
  */
 
 / {
+/ {
     chosen {
-        // ZMK共通処理が求める「columns/rows」のチェックを親側（dtsi）の指定でパスさせるため、
-        // 右手側のkscanターゲットを共通のkscan0に綺麗に紐付け直します。
-        zmk,kscan = &kscan0;
+        zephyr,display = &oled;
+        zmk,physical-layout = &keyball_physical_layout;
+        zmk,kscan = &kscan0; // 👈 ここが kscan0 を指していることを確認
+    };
+};
+
     };
 };
 
