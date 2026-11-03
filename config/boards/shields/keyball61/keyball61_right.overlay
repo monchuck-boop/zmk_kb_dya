@@ -17,11 +17,15 @@
 };
 
 /* 
- * ⚠️ 【超重要】左4列の電気的フリーズを解消するマトリクス再定義
- * 行（row）と列（col）のピンを正確な順序で結合し、右手単体で全キーをスキャンさせます
+ * ⚠️ 【超重要】左4列の電気的フリーズを解消し、ZMKに正しいマトリクスサイズを認識させる再定義
  */
 &kscan0 {
     compatible = "zmk,kscan-charlieplexing";
+    
+    // 👇【これが足りなかった真の対策】ZMKのマクロ展開エラーを完全に防ぎます
+    columns = <6>;
+    rows = <5>;
+
     row-gpios
         = <&pro_micro 3 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
         , <&pro_micro 4 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
@@ -138,12 +142,8 @@
   };
 };
 
-
-
 /* 
- * ⚠️ 【最重要】ZMK Studio画面用のキーレイアウトプレビュー機能を完全に無効化
- * これにより、内部ID(ord_8)の結合エラーを100%完全に回避し、ビルドを完遂させます。
- * (※DYA Studioでのオンラインキーマップ書き換え機能自体には一切影響しません)
+ * ZMK Studio用の物理レイアウトプレビューを無効化して結合エラーを完全に回避
  */
 &keyball_physical_layout {
     status = "disabled";
