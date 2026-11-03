@@ -5,14 +5,10 @@
  */
 
 / {
-/ {
     chosen {
         zephyr,display = &oled;
-        zmk,physical-layout = &keyball_physical_layout;
-        zmk,kscan = &kscan0; // 👈 ここが kscan0 を指していることを確認
-    };
-};
-
+        zmk,kscan = &kscan0;
+        zmk,matrix-transform = &right_transform;
     };
 };
 
@@ -26,9 +22,7 @@
  * ⚠️ 左4列の電気的フリーズを解消し、ZMKに正しいマトリクスサイズを認識させる再定義
  */
 &kscan0 {
-    compatible = "zmk,kscan-gpio-matrix"; // 元の構成に合わせて指定
-    
-    // ZMKのマクロ展開エラーとサイズ不一致を完全に防ぎます
+    compatible = "zmk,kscan-gpio-matrix";
     columns = <6>;
     rows = <5>;
 
@@ -148,9 +142,6 @@
   };
 };
 
-/* 
- * ZMK Studio用の物理レイアウトプレビューを無効化して結合エラーを完全に回避
- */
 &keyball_physical_layout {
     status = "disabled";
 };
