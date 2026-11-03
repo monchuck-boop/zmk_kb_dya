@@ -8,9 +8,10 @@
     chosen {
         zephyr,display = &oled;
         zmk,kscan = &kscan0;
-        zmk,matrix-transform = &right_transform;
+        zmk,matrix-transform = &right_transform; // 👈 これが指定されていればOKです
     };
 };
+
 
 #include "keyball61.dtsi"
 
